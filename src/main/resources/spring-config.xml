@@ -11,7 +11,7 @@
                            http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
     <context:annotation-config />
-    <context:component-scan base-package="kr.co.dpm.agent" />
+    <context:component-scan base-package="kr.co.dpm.agent.device" />
 
     <mvc:annotation-driven />
     <mvc:default-servlet-handler />
