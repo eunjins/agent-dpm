@@ -22,7 +22,7 @@ public class DeviceUtil {
         try {
             Map<String, String> systemInfo = executeCommand("systeminfo");
 
-            device.setId(systemInfo.get("제품 ID"));
+            device.setDeviceId(systemInfo.get("제품 ID"));
             device.setHostName(systemInfo.get("호스트 이름"));
 
             String ipAddress = InetAddress.getLocalHost().getHostAddress();

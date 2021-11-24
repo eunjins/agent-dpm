@@ -3,7 +3,7 @@ package kr.co.dpm.model;
 import java.io.Serializable;
 
 public class Device implements Serializable {
-    private String id;
+    private String deviceId;
     private String hostName;
     private String ipAddress;
 
@@ -11,12 +11,12 @@ public class Device implements Serializable {
 
     }
 
-    public String getId() {
-        return id;
+    public String getDeviceId() {
+        return deviceId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
     }
 
     public String getHostName() {
@@ -38,7 +38,7 @@ public class Device implements Serializable {
     @Override
     public String toString() {
         return "Device{" +
-                "id='" + id + '\'' +
+                "deviceId='" + deviceId + '\'' +
                 ", hostName='" + hostName + '\'' +
                 ", ipAddress='" + ipAddress + '\'' +
                 '}';

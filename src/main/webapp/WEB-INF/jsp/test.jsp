@@ -11,6 +11,9 @@
     <title>Title</title>
 </head>
 <body>
-
+    <form action="/script/distribute" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file"/>
+        <input type="submit" name="전송"/>
+    </form>
 </body>
 </html>
