@@ -1,4 +1,4 @@
-package kr.co.dpm.model;
+package kr.co.dpm.agent.device;
 
 import java.io.Serializable;
 
@@ -6,6 +6,7 @@ public class Device implements Serializable {
     private String deviceId;
     private String hostName;
     private String ipAddress;
+    private String jdkVersion;
 
     public Device() {
 
@@ -35,12 +36,21 @@ public class Device implements Serializable {
         this.ipAddress = ipAddress;
     }
 
+    public String getJdkVersion() {
+        return jdkVersion;
+    }
+
+    public void setJdkVersion(String jdkVersion) {
+        this.jdkVersion = jdkVersion;
+    }
+
     @Override
     public String toString() {
         return "Device{" +
                 "deviceId='" + deviceId + '\'' +
                 ", hostName='" + hostName + '\'' +
                 ", ipAddress='" + ipAddress + '\'' +
+                ", jdkVersion='" + jdkVersion + '\'' +
                 '}';
     }
 }

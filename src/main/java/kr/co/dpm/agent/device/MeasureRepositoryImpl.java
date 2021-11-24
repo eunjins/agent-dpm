@@ -1,6 +1,4 @@
-package kr.co.dpm.agent.device.repository;
-
-import kr.co.dpm.model.Measure;
+package kr.co.dpm.agent.device;
 
 public class MeasureRepositoryImpl implements MeasureRepository{
     @Override
