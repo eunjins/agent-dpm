@@ -3,11 +3,13 @@ package kr.co.dpm.agent.device;
 import okhttp3.*;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class DeviceRepositoryImpl implements DeviceRepository{
-    private static final String IP_ADDRESS = "";
+    @Value("${server-ip}")
+    private String ipAddress;
 
     @Override
     public boolean requestDevice(Device device) throws Exception {
@@ -18,8 +20,10 @@ public class DeviceRepositoryImpl implements DeviceRepository{
         String json = objectMapper.writeValueAsString(device);
         RequestBody body = RequestBody.create(JSON, json);
 
-        Request request = new Request.Builder() //
-                .url("http://" + IP_ADDRESS + "/device/data")
+
+
+        Request request = new Request.Builder()
+                .url("http://" + ipAddress + "/devices/data")
                 .post(body)
                 .build();
 

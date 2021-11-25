@@ -29,7 +29,6 @@ public class AgentControllerImpl {
         Map<String, String> status = new HashMap<String, String>();
 
         try {
-            agentService.executeCommand();
             agentService.executeScript(multipartFile, request, id);
 
             status.put("code", "200");

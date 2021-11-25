@@ -7,8 +7,8 @@ import java.io.File;
 
 public interface AgentService {
     public Device executeCommand();
-    public void sendDevice() throws Exception;
+    public void sendDevice();
     public File receiveScript(MultipartFile multipartFile, HttpServletRequest request, String id) throws Exception;
     public void executeScript(MultipartFile multipartFile, HttpServletRequest request, String id) throws Exception;
-    public void sendMeasure(Measure measure);
+    public void sendMeasure(Measure measure)throws Exception;
 }

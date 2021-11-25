@@ -1,5 +1,6 @@
 package kr.co.dpm.agent.device;
 
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -7,19 +8,16 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
 
 @Component
 public class DeviceUtil {
+    private static final Logger logger = LogManager.getLogger(DeviceUtil.class);
+
     private Device device;
 
     public Device getDevice() {
         return device;
-    }
-
-    public static void main(String[] args) {
-        DeviceUtil deviceUtil = new DeviceUtil();
-
-        System.out.println(deviceUtil.createDevice());
     }
 
     public Device createDevice() {
@@ -54,7 +52,7 @@ public class DeviceUtil {
     }
 
     public String executeCommand(String command) throws Exception {
-        System.out.println("command -->" + command);
+        logger.debug("---> command : " + command);
         Map<String, String> systemInfo = new HashMap<String, String>();
 
         Process process = Runtime.getRuntime().exec(command);

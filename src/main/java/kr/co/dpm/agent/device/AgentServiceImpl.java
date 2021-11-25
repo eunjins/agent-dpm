@@ -1,5 +1,9 @@
 package kr.co.dpm.agent.device;
 
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -8,11 +12,52 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 
 @Service
-public class AgentServiceImpl implements AgentService {
+public class AgentServiceImpl implements AgentService, InitializingBean, Runnable {
+    private static final Logger logger = LogManager.getLogger(AgentService.class);
+    private File file;
     @Autowired
     private DeviceUtil deviceUtil;
     @Autowired
     private DeviceRepository deviceRepository;
+    @Autowired
+    private MeasureRepository measureRepository;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        sendDevice();
+    }
+
+    @Override
+    public void run() {
+        String fileName = file.getName();
+        String fileDirectory = file.getPath().substring(0, file.getPath().length() - fileName.length() - 1);
+        String command = "java -cp " + fileDirectory + " " + fileName.substring(0, fileName.length() - 6);  //여기
+        logger.debug("-----> 커맨드 : " + command);
+
+        Measure measure = new Measure();
+        measure.setDeviceId(deviceUtil.getDevice().getDeviceId());
+
+        try {
+            long beforeTime = System.currentTimeMillis();
+            logger.debug("-----> 결과 : " + deviceUtil.executeCommand(command));
+            long afterTime = System.currentTimeMillis();
+
+            long secDiffTime = (afterTime - beforeTime);
+            measure.setExecuteTime(Long.toString(secDiffTime));
+            measure.setStatus('Y');
+
+        } catch (Exception e) {
+            measure.setExecuteTime("0");
+            measure.setStatus('N');
+        }
+        logger.debug("-----> 측정 결과 정보 : " + measure);
+
+        try {
+            sendMeasure(measure);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public Device executeCommand() {
@@ -32,11 +77,19 @@ public class AgentServiceImpl implements AgentService {
         for (int i = 0; i < 10; i++) {
             try {
                 if (deviceRepository.requestDevice(device)) {
-                    break;
+                    logger.debug("------>  송신 성공!!");
+                    return;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                logger.debug("------>  송신 실패");
             }
+        }
+
+        try {
+            deviceUtil.executeCommand("shutdown.bat");        //TODO 10번 재송신 실패시 종료...
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -45,10 +98,14 @@ public class AgentServiceImpl implements AgentService {
         String deviceId = deviceUtil.getDevice().getDeviceId();
 
         Cryptogram cryptogram = new Cryptogram(deviceId);
-
-        String decryptionId = cryptogram.decrypt(id);
-
-        if (!deviceId.equals(decryptionId)) {
+        String decryptionId = null;
+        try {
+            /*decryptionId = cryptogram.decrypt(id); //TODO 디버깅을 위한 복호화 생략...
+            if (!deviceId.equals(decryptionId)) {
+                throw new FileNotFoundException();
+            } */
+        } catch (Exception e) {
+            e.printStackTrace();
             throw new FileNotFoundException();
         }
 
@@ -59,7 +116,7 @@ public class AgentServiceImpl implements AgentService {
             directory.mkdir();
         }
 
-        File file = new File(path + File.separator + "script.class");
+        File file = new File(path + File.separator + multipartFile.getOriginalFilename());
         multipartFile.transferTo(file);
 
         return file;
@@ -67,14 +124,15 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     public void executeScript(MultipartFile multipartFile, HttpServletRequest request, String id) throws Exception {
-        File file = receiveScript(multipartFile, request, id);
+        file = receiveScript(multipartFile, request, id);
 
-        //TODO 스크립트 실행..
-        //TODO 측정 결과 송신...
+        Thread thread  = new Thread(this);
+
+        thread.start();
     }
 
     @Override
-    public void sendMeasure(Measure measure) {
-
+    public void sendMeasure(Measure measure) throws Exception {
+        measureRepository.request(measure);
     }
 }

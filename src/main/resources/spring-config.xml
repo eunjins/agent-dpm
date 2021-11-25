@@ -17,6 +17,10 @@
           class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <property name="maxUploadSize" value="102400010" />
     </bean>
+    <bean id="propertySourcesPlaceholderConfigurer"
+            class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+        <property name="locations" value="classpath:config/server-ip.properties"/>
+    </bean>
 
     <mvc:annotation-driven />
     <mvc:default-servlet-handler />
