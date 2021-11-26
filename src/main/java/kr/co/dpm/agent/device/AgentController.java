@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.FileNotFoundException;
@@ -18,16 +18,16 @@ public class AgentController {
     @Autowired
     AgentService agentService;
 
-    @GetMapping("/test")
+    @GetMapping("/test")          //스크립트 수신 테스트
     public ModelAndView test() {
-        ModelAndView mav = new ModelAndView("test");
-        return mav;
+        ModelAndView modelAndView = new ModelAndView("test");
+        return modelAndView;
     }
 
     @PostMapping("/script/distribute")
-    public Map<String, String> receiveScript(@RequestParam("file") MultipartFile multipartFile
+    public Map<String, String> receiveScript(@RequestParam("scriptFile") MultipartFile multipartFile
             , HttpServletRequest request
-            , @RequestParam String encryptId) {        //TODO 인터페이스 정의서 보고 변경
+            , @RequestParam String encryptId) {
         Map<String, String> status = new HashMap<String, String>();
 
         try {
@@ -36,7 +36,7 @@ public class AgentController {
             status.put("code", "200");
             status.put("message", "정상 요청");
 
-        } catch(FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             status.put("code", "400");
             status.put("message", "잘못된 요청");
             e.printStackTrace();

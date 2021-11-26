@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class DeviceRepositoryImpl implements DeviceRepository{
+public class DeviceRepositoryImpl implements DeviceRepository {
     private static final Logger logger = LogManager.getLogger(DeviceRepositoryImpl.class);
 
     @Value("${server-ip}")

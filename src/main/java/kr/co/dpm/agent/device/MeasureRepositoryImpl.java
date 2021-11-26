@@ -1,6 +1,8 @@
 package kr.co.dpm.agent.device;
 
 import okhttp3.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Repository;
 public class MeasureRepositoryImpl implements MeasureRepository{
     @Value("${server-ip}")
     private String ipAddress;
+    private static final Logger logger = LogManager.getLogger(MeasureRepositoryImpl.class);
 
     @Override
     public boolean request(Measure measure) throws Exception {
@@ -29,9 +32,11 @@ public class MeasureRepositoryImpl implements MeasureRepository{
         ResponseBody responseBody = response.body();
         JSONObject idResponse = new JSONObject(responseBody.string());
 
-        if (idResponse.getString("code") == "200") {
+        if ("200".equals(idResponse.getString("code"))) {
             return true;
         } else {
+            logger.debug("------------> 측정 결과 송신 오류 : " + idResponse.getString("message"));
+
             return false;
         }
     }
