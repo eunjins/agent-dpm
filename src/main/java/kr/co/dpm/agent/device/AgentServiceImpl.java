@@ -89,6 +89,8 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
 
                 } else {
                     logger.debug("------>  디바이스 정보 송신 실패");
+
+                    Thread.sleep(1000);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -102,6 +104,7 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
     public File receiveScript(MultipartFile multipartFile, HttpServletRequest request, String id) throws Exception {
         String deviceId = deviceUtil.getDevice().getId();
 
+        /*
         try {
             Cryptogram cryptogram = new Cryptogram(deviceId);
             String decryptionId = cryptogram.decrypt(id);          //복호화
@@ -115,15 +118,29 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
 
             throw new FileNotFoundException();
         }
-
+        */
         String path = request.getSession().getServletContext().getRealPath("/") + "script";
 
         File directory = new File(path);            //디렉토리 설정
+
         if (!directory.isDirectory()) {
             directory.mkdir();
         }
 
+        try {
+            deviceUtil.executeCommand("sudo chmod 777 " + path);
+        } catch (Exception e) {
+
+        }
+
         File file = new File(path + File.separator + multipartFile.getOriginalFilename());
+
+        file.setExecutable(true, false);
+        file.setReadable(true, false);
+        file.setWritable(true, false);
+
+        logger.debug("--------> 파일 권환" + file.canWrite() + file.canExecute());
+
         multipartFile.transferTo(file);             //파일을 로컬에 수신
 
         return file;
