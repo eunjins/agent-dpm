@@ -3,7 +3,7 @@ package kr.co.dpm.agent.device;
 import java.io.Serializable;
 
 public class Device implements Serializable {
-    private String deviceId;
+    private String id;
     private String hostName;
     private String ipAddress;
     private String jdkVersion;
@@ -12,12 +12,12 @@ public class Device implements Serializable {
 
     }
 
-    public String getDeviceId() {
-        return deviceId;
+    public String getId() {
+        return id;
     }
 
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getHostName() {
@@ -47,7 +47,7 @@ public class Device implements Serializable {
     @Override
     public String toString() {
         return "Device{" +
-                "deviceId='" + deviceId + '\'' +
+                "deviceId='" + id + '\'' +
                 ", hostName='" + hostName + '\'' +
                 ", ipAddress='" + ipAddress + '\'' +
                 ", jdkVersion='" + jdkVersion + '\'' +

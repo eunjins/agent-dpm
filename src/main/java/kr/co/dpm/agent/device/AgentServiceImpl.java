@@ -35,7 +35,7 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
         logger.debug("-----> 커맨드 : " + command);
 
         Measure measure = new Measure();
-        measure.setDeviceId(deviceUtil.getDevice().getDeviceId());
+        measure.setDeviceId(deviceUtil.getDevice().getId());
 
         try {
             long beforeTime = System.currentTimeMillis();
@@ -71,8 +71,9 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
     }
 
     @Override
-    public void sendDevice() {
+    public void sendDevice() {              //TODO DEBUGING...
         Device device = executeCommand();
+
 
         for (int i = 0; i < 10; i++) {
             try {
@@ -95,7 +96,7 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
 
     @Override
     public File receiveScript(MultipartFile multipartFile, HttpServletRequest request, String id) throws Exception {
-        String deviceId = deviceUtil.getDevice().getDeviceId();
+        String deviceId = deviceUtil.getDevice().getId();
 
         Cryptogram cryptogram = new Cryptogram(deviceId);
         String decryptionId = null;

@@ -25,11 +25,13 @@ public class AgentControllerImpl {
     }
 
     @PostMapping("/script/distribute")
-    public Map<String, String> receiveScript(@RequestParam("file") MultipartFile multipartFile, HttpServletRequest request, @RequestParam String id) {
+    public Map<String, String> receiveScript(@RequestParam("file") MultipartFile multipartFile
+            , HttpServletRequest request
+            , @RequestParam String encryptId) {        //TODO 인터페이스 정의서 보고 변경
         Map<String, String> status = new HashMap<String, String>();
 
         try {
-            agentService.executeScript(multipartFile, request, id);
+            agentService.executeScript(multipartFile, request, encryptId);
 
             status.put("code", "200");
             status.put("message", "정상 요청");
