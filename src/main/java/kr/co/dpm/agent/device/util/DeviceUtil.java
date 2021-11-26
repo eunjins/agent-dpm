@@ -1,5 +1,6 @@
-package kr.co.dpm.agent.device;
+package kr.co.dpm.agent.device.util;
 
+import kr.co.dpm.agent.device.Device;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
@@ -45,6 +46,9 @@ public class DeviceUtil {
             } else if (osName.contains("linux")) {
                 osName = "linux";
 
+            } else {
+                osName = "unix";
+
             }
 
             String systemInfoCommand = properties.getProperty(osName + "-command");                         //운영체제에 맞는 명령어 찾기
@@ -55,7 +59,7 @@ public class DeviceUtil {
             for (String line : splitSystemInfo) {
                 String[] splitLine = line.split(":");
 
-                if (productIdCommand.equals(splitLine[0])) {
+                if (productIdCommand.equals(splitLine[0].trim())) {
                     device.setId(splitLine[1].trim());            //제품 ID 지정
                 }
             }

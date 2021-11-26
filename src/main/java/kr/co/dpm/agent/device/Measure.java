@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Measure implements Serializable {
     private String deviceId;
-    private String executeTime;
+    private String execTime;
     private char status;
 
     public Measure() {
@@ -19,12 +19,12 @@ public class Measure implements Serializable {
         this.deviceId = deviceId;
     }
 
-    public String getExecuteTime() {
-        return executeTime;
+    public String getExecTime() {
+        return execTime;
     }
 
-    public void setExecuteTime(String executeTime) {
-        this.executeTime = executeTime;
+    public void setExecTime(String executeTime) {
+        this.execTime = executeTime;
     }
 
     public char getStatus() {
@@ -39,7 +39,7 @@ public class Measure implements Serializable {
     public String toString() {
         return "Measure{" +
                 "deviceId='" + deviceId + '\'' +
-                ", executeTime='" + executeTime + '\'' +
+                ", execTime='" + execTime + '\'' +
                 ", status='" + status + '\'' +
                 '}';
     }

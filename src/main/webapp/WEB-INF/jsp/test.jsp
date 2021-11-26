@@ -14,7 +14,7 @@
     <form action="/script/distribute" method="POST" enctype="multipart/form-data">
         <input type="file" name="file"/>
         <input type="submit" name="전송"/>
-        <input type="hidden" name="id" value="00325-96018-79885-AAOEM" />
+        <input type="hidden" name="encryptId" value="00325-96018-79885-AAOEM" />
     </form>
 </body>
 </html>

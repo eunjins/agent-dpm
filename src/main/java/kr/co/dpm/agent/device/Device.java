@@ -47,7 +47,7 @@ public class Device implements Serializable {
     @Override
     public String toString() {
         return "Device{" +
-                "deviceId='" + id + '\'' +
+                "id='" + id + '\'' +
                 ", hostName='" + hostName + '\'' +
                 ", ipAddress='" + ipAddress + '\'' +
                 ", jdkVersion='" + jdkVersion + '\'' +

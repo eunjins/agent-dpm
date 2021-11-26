@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-public class AgentControllerImpl {
+public class AgentController {
     @Autowired
     AgentService agentService;
 

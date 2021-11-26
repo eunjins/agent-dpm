@@ -1,6 +1,8 @@
 package kr.co.dpm.agent.device;
 
 
+import kr.co.dpm.agent.device.util.Cryptogram;
+import kr.co.dpm.agent.device.util.DeviceUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
@@ -43,19 +45,25 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
             long afterTime = System.currentTimeMillis();
 
             long secDiffTime = (afterTime - beforeTime);
-            measure.setExecuteTime(Long.toString(secDiffTime));
+            measure.setExecTime(Long.toString(secDiffTime));
             measure.setStatus('Y');
 
         } catch (Exception e) {
-            measure.setExecuteTime("0");
+            measure.setExecTime("0");
             measure.setStatus('N');
         }
         logger.debug("-----> 측정 결과 정보 : " + measure);
 
         try {
             sendMeasure(measure);
+
+            logger.debug("-----> 측정 송신 성공!");
+
+            file.delete();
         } catch (Exception e) {
             e.printStackTrace();
+
+            logger.debug("-----> 측정 송신 실패 혹은 파일 삭제 실패");
         }
     }
 
@@ -71,15 +79,17 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
     }
 
     @Override
-    public void sendDevice() {              //TODO DEBUGING...
+    public void sendDevice() {
         Device device = executeCommand();
 
 
         for (int i = 0; i < 10; i++) {
             try {
-                if (deviceRepository.requestDevice(device)) {
+                if (deviceRepository.request(device)) {
                     logger.debug("------>  송신 성공!!");
-                    return;
+                    break;
+                } else {
+                    logger.debug("------>  송신 실패");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -87,24 +97,19 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
             }
         }
 
-        try {
-            deviceUtil.executeCommand("shutdown.bat");        //TODO 10번 재송신 실패시 종료...
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
     public File receiveScript(MultipartFile multipartFile, HttpServletRequest request, String id) throws Exception {
         String deviceId = deviceUtil.getDevice().getId();
 
-        Cryptogram cryptogram = new Cryptogram(deviceId);
+        Cryptogram cryptogram = new Cryptogram(deviceId);       //복호화
         String decryptionId = null;
         try {
-            /*decryptionId = cryptogram.decrypt(id); //TODO 디버깅을 위한 복호화 생략...
+            decryptionId = cryptogram.decrypt(id);
             if (!deviceId.equals(decryptionId)) {
                 throw new FileNotFoundException();
-            } */
+            }
         } catch (Exception e) {
             e.printStackTrace();
             throw new FileNotFoundException();
@@ -112,13 +117,13 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
 
         String path = request.getSession().getServletContext().getRealPath("/") + "script";
 
-        File directory = new File(path);
+        File directory = new File(path);        //디렉토리 설정
         if (!directory.isDirectory()) {
             directory.mkdir();
         }
 
         File file = new File(path + File.separator + multipartFile.getOriginalFilename());
-        multipartFile.transferTo(file);
+        multipartFile.transferTo(file);         //파일 수신
 
         return file;
     }
@@ -127,7 +132,7 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
     public void executeScript(MultipartFile multipartFile, HttpServletRequest request, String id) throws Exception {
         file = receiveScript(multipartFile, request, id);
 
-        Thread thread  = new Thread(this);
+        Thread thread  = new Thread(this);      //스크립트 수신에 응답을 하기위한 스레드
 
         thread.start();
     }
