@@ -16,7 +16,7 @@ import java.io.*;
 
 @Service
 public class AgentServiceImpl implements AgentService, InitializingBean, Runnable {
-    @Value("decryption")
+    @Value("${decryption}")
     private String decryption;      //복호화 여부
     private static final Logger logger = LogManager.getLogger(AgentService.class);
     private File file;
@@ -39,7 +39,7 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
         String fileDirectory = file.getPath().substring(0, file.getPath().length() - fileName.length() - 1);
         String command = "java -cp " + fileDirectory + " " + fileName.substring(0, fileName.length() - 6);          //실행하기 위한 커맨드 생성
 
-        logger.debug("-----> 커맨드 : " + command);
+        logger.debug("-----> input command is : " + command);
 
         Measure measure = new Measure();
         measure.setDeviceId(deviceUtil.getDevice().getId());
@@ -51,7 +51,7 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
                 result = deviceUtil.executeCommand(command);         //스크립트 실행...
             }
 
-            logger.debug("-----> 스크립트 실행 결과 : " + result);
+            logger.debug("-----> script result is : " + result);
             long afterTime = System.currentTimeMillis();
 
             long secDiffTime = (afterTime - beforeTime);                //실행 시간 측정
@@ -64,7 +64,7 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
             measure.setExecTime("0");
             measure.setStatus('N');             //실행 실패 시 상태를 'N', 실행시간을 0으로 지정한다.
         } finally {
-            logger.debug("-----> 측정 결과 정보 : " + measure);
+            logger.debug("-----> measure information is : " + measure);
 
             sendMeasure(measure);
 
@@ -90,17 +90,17 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
         for (int i = 0; i < 10; i++) {                //전송 실패 시 10번 까지 재전송 한다.
             try {
                 if (deviceRepository.request(device)) {
-                    logger.debug("------>  디바이스 정보 송신 성공!!");
+                    logger.debug("------>  Success in sending device information!!");
                     break;
 
                 } else {
-                    logger.debug("------>  디바이스 정보 송신 실패");
+                    logger.debug("------>  Fail to send device information...");
 
                     Thread.sleep(1000);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                logger.debug("------>  디바이스 정보 송신 실패");
+                logger.debug("------>  Fail to send device information...");
             }
         }
 
@@ -110,6 +110,7 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
     public File receiveScript(MultipartFile multipartFile, HttpServletRequest request, String id) throws Exception {
         String deviceId = deviceUtil.getDevice().getId();
 
+        logger.debug("------>  decryption is " + decryption);
         if ("true".equals(decryption)) {
             try {
                 Cryptogram cryptogram = new Cryptogram(deviceId);
@@ -134,7 +135,7 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
         }
 
         try {
-            deviceUtil.executeCommand("sudo chmod -R 777 " + path + File.separator);
+            deviceUtil.executeCommand("chmod -R 777 " + request.getSession().getServletContext().getRealPath("/") + File.separator);
         } catch (Exception e) {
 
         }
@@ -145,7 +146,7 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
         file.setReadable(true, false);
         file.setWritable(true, false);
 
-        logger.debug("--------> 파일 권환" + file.canWrite() + file.canExecute());
+        logger.debug("--------> permission of file : " + file.canWrite() + file.canExecute());
 
         multipartFile.transferTo(file);             //파일을 로컬에 수신
 
