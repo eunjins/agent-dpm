@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -72,7 +74,25 @@ public class DeviceUtil {
             String[] springJdk = jdkInfo.split(" ");
             device.setJdkVersion(springJdk[1]);
 
-            String ipAddress = InetAddress.getLocalHost().getHostAddress();     //IP 주소 지정
+            String ipAddress = "";
+            Enumeration<NetworkInterface> networkInterfaceEnumeration = NetworkInterface.getNetworkInterfaces();
+
+            while (networkInterfaceEnumeration.hasMoreElements()) {                  //IP 주소 지정
+                NetworkInterface networkInterface = networkInterfaceEnumeration.nextElement();
+                Enumeration<InetAddress> inetAddresses= networkInterface.getInetAddresses();
+
+                while (inetAddresses.hasMoreElements()) {
+                    InetAddress inetAddress = inetAddresses.nextElement();
+
+                    if (!inetAddress.isLoopbackAddress() &&
+                            !inetAddress.isLinkLocalAddress() &&
+                            inetAddress.isSiteLocalAddress()) {
+
+                        ipAddress = inetAddress.getHostAddress().toString();
+                    }
+                }
+            }
+
             device.setIpAddress(ipAddress);
 
             logger.debug("-----------> productIdCommand,  디바이스 정보 : " + productIdCommand + device);
