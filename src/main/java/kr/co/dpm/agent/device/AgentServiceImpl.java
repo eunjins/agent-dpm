@@ -134,7 +134,7 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
         }
 
         try {
-            deviceUtil.executeCommand("sudo chmod 777 " + path);
+            deviceUtil.executeCommand("sudo chmod -R 777 " + path + File.separator);
         } catch (Exception e) {
 
         }
