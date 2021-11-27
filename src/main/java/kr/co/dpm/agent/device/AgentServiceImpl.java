@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,6 +16,8 @@ import java.io.*;
 
 @Service
 public class AgentServiceImpl implements AgentService, InitializingBean, Runnable {
+    @Value("decryption")
+    private String decryption;      //복호화 여부
     private static final Logger logger = LogManager.getLogger(AgentService.class);
     private File file;
 
@@ -43,7 +46,10 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
 
         try {
             long beforeTime = System.currentTimeMillis();
-            String result = deviceUtil.executeCommand(command);         //스크립트 실행...
+            String result = null;
+            synchronized (this) {
+                result = deviceUtil.executeCommand(command);         //스크립트 실행...
+            }
 
             logger.debug("-----> 스크립트 실행 결과 : " + result);
             long afterTime = System.currentTimeMillis();
@@ -57,13 +63,13 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
 
             measure.setExecTime("0");
             measure.setStatus('N');             //실행 실패 시 상태를 'N', 실행시간을 0으로 지정한다.
+        } finally {
+            logger.debug("-----> 측정 결과 정보 : " + measure);
+
+            sendMeasure(measure);
+
+            file.delete();
         }
-
-        logger.debug("-----> 측정 결과 정보 : " + measure);
-
-        sendMeasure(measure);
-
-        file.delete();
     }
 
     @Override
@@ -104,21 +110,21 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
     public File receiveScript(MultipartFile multipartFile, HttpServletRequest request, String id) throws Exception {
         String deviceId = deviceUtil.getDevice().getId();
 
-        /*
-        try {
-            Cryptogram cryptogram = new Cryptogram(deviceId);
-            String decryptionId = cryptogram.decrypt(id);          //복호화
+        if ("true".equals(decryption)) {
+            try {
+                Cryptogram cryptogram = new Cryptogram(deviceId);
+                String decryptionId = cryptogram.decrypt(id);          //복호화
 
-            if (!deviceId.equals(decryptionId)) {
-                throw new FileNotFoundException();              //복호화한 아이디가 일치하지 않을 경우 400에러 응답
+                if (!deviceId.equals(decryptionId)) {
+                    throw new FileNotFoundException();              //복호화한 아이디가 일치하지 않을 경우 400에러 응답
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new FileNotFoundException();
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-
-            throw new FileNotFoundException();
         }
-        */
+
         String path = request.getSession().getServletContext().getRealPath("/") + "script";
 
         File directory = new File(path);            //디렉토리 설정
@@ -163,8 +169,8 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
 
             } else {
                 logger.debug("------>  측정 결과 정보 송신 실패");
-
             }
+
         } catch (Exception e) {
             e.printStackTrace();
 

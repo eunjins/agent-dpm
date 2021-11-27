@@ -19,7 +19,7 @@
     </bean>
     <bean id="propertySourcesPlaceholderConfigurer"
             class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
-        <property name="locations" value="classpath:config/server-ip.properties"/>
+        <property name="locations" value="classpath:config/server-config.properties"/>
     </bean>
 
     <mvc:annotation-driven />

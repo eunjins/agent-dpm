@@ -109,6 +109,7 @@ public class DeviceUtil {
         } catch (Exception e) {
             e.printStackTrace();
 
+            throw e;
         } finally {
             try {
                 if (bufferedReader != null) {
@@ -119,7 +120,5 @@ public class DeviceUtil {
                 e.printStackTrace();
             }
         }
-
-        return null;
     }
 }
