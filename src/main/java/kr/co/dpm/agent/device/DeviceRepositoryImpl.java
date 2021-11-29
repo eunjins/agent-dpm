@@ -24,7 +24,7 @@ public class DeviceRepositoryImpl implements DeviceRepository {
         String json = objectMapper.writeValueAsString(device);
         RequestBody body = RequestBody.create(JSON, json);
 
-        logger.debug("-------------> 요청 json" + json);
+        logger.debug("-------------> request json is : " + json);
         Request request = new Request.Builder()
                 .url("http://" + ipAddress + "/devices/data")
                 .post(body)
