@@ -8,11 +8,13 @@ import java.io.File;
 public interface AgentService {
     public Device executeCommand();
 
-    public void sendDevice();
+    public void sendDevice(Device device);
 
-    public File receiveScript(MultipartFile multipartFile, HttpServletRequest request, String id) throws Exception;
+    public File receiveScript(MultipartFile multipartFile, HttpServletRequest request) throws Exception;
 
-    public void executeScript(MultipartFile multipartFile, HttpServletRequest request, String id) throws Exception;
+    public boolean decryption(String word) throws Exception;
 
-    public void sendMeasure(Measure measure) throws Exception;
+    public Measure executeScript(File file);
+
+    public void sendMeasure(Measure measure);
 }

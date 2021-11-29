@@ -31,12 +31,16 @@ public class MeasureRepositoryImpl implements MeasureRepository{
         Response response = client.newCall(request).execute();
         ResponseBody responseBody = response.body();
 
-        JSONObject idResponse = new JSONObject(responseBody.string());
+        String bodyString = responseBody.string();
+
+        logger.debug(bodyString);
+
+        JSONObject idResponse = new JSONObject(bodyString);
 
         if ("200".equals(idResponse.getString("code"))) {
             return true;
         } else {
-            logger.debug("------------> 측정 결과 송신 오류 : " + idResponse.getString("message"));
+            logger.debug("------------> error message of measure result response is : " + idResponse.getString("message"));
 
             return false;
         }

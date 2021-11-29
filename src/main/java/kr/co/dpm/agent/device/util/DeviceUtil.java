@@ -1,111 +1,39 @@
 package kr.co.dpm.agent.device.util;
 
-import kr.co.dpm.agent.device.Device;
+import kr.co.dpm.agent.device.AgentService;
+import kr.co.dpm.agent.device.Measure;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 
 @Component
-public class DeviceUtil {
+public class DeviceUtil implements Runnable {
     private static final Logger logger = LogManager.getLogger(DeviceUtil.class);
-    private Device device;              //디바이스 정보를 공유하기 위한 필드
+    private File file;
+
     @Autowired
-    private ResourceLoader resourceLoader;
+    private AgentService agentService;
 
-
-    public Device getDevice() {
-        return device;
-    }
-
-    public Device createDevice() {       //디바이스 정보 생성 로직
-        device = new Device();
-        Properties properties = new Properties();
-
+    @Override
+    public void run() {
+        Measure measure = null;
         try {
-            File file = resourceLoader.getResource("classpath:config/device-id.properties").getFile();      //운영체제 별 명령어를 가지고 있는 properties 가져오기
-            properties.load(new InputStreamReader(new FileInputStream(file)));
-
-            String osName = System.getProperty("os.name").toLowerCase();                                       //운영체제 이름 가져오기
-            if (osName.contains("win")) {
-                osName = "win";
-
-            } else if (osName.contains("nix") || osName.contains("nux") || osName.contains("aix")) {
-                osName = "unix";
-
-            } else if (osName.contains("linux")) {
-                osName = "linux";
-
-            } else {
-                osName = "unix";
-
-            }
-
-            String systemInfoCommand = properties.getProperty(osName + "-command");         //운영체제에 맞는 명령어 찾기
-            String productIdCommand = properties.getProperty(osName + "-id");
-
-            String systemInfo = executeCommand(systemInfoCommand);          //제품 ID를 찾기 위한 명령어 실행
-            String[] splitSystemInfo = systemInfo.split("\n");
-            for (String line : splitSystemInfo) {
-                String[] splitLine = line.split(":");
-
-                if (productIdCommand.equals(splitLine[0].trim())) {
-                    device.setId(splitLine[1].trim());                      //제품 ID 지정
-                }
-            }
-
-            String hostNameInfo = executeCommand("hostname").trim();        //호스트 이름 지정
-            device.setHostName(hostNameInfo);
-
-            String jdkInfo = executeCommand("java --version");              //JDK-version 지정
-            String[] springJdk = jdkInfo.split(" ");
-            device.setJdkVersion(springJdk[1]);
-
-            String ipAddress = "";
-            Enumeration<NetworkInterface> networkInterfaceEnumeration = NetworkInterface.getNetworkInterfaces();
-
-            while (networkInterfaceEnumeration.hasMoreElements()) {                  //IP 주소 지정
-                NetworkInterface networkInterface = networkInterfaceEnumeration.nextElement();
-                Enumeration<InetAddress> inetAddresses= networkInterface.getInetAddresses();
-
-                while (inetAddresses.hasMoreElements()) {
-                    InetAddress inetAddress = inetAddresses.nextElement();
-
-                    if (!inetAddress.isLoopbackAddress() &&
-                            !inetAddress.isLinkLocalAddress() &&
-                            inetAddress.isSiteLocalAddress()) {
-
-                        ipAddress = inetAddress.getHostAddress().toString();
-                    }
-                }
-            }
-
-            device.setIpAddress(ipAddress);
-
-            logger.debug("-----------> productIdCommand,  디바이스 정보 : " + productIdCommand + device);
+            measure = agentService.executeScript(file);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.debug("-----------> 디바이스 생성 실패");
         }
 
-        return device;
+        agentService.sendMeasure(measure);
     }
 
     public String executeCommand(String command) throws Exception {     //명령어 실행
-        logger.debug("---> command : " + command);
+        logger.debug("--------> command is : " + command);
 
         Process process = Runtime.getRuntime().exec(command);
 
@@ -140,5 +68,9 @@ public class DeviceUtil {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void setFile(File file) {
+        this.file = file;
     }
 }
