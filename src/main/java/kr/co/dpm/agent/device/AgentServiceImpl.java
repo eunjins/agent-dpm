@@ -5,88 +5,110 @@ import kr.co.dpm.agent.device.util.Cryptogram;
 import kr.co.dpm.agent.device.util.DeviceUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
+import java.util.Properties;
 
 @Service
-public class AgentServiceImpl implements AgentService, InitializingBean, Runnable {
+public class AgentServiceImpl implements AgentService {
     @Value("${decryption}")
     private String decryption;      //복호화 여부
     private static final Logger logger = LogManager.getLogger(AgentService.class);
-    private File file;
-
+    private Device device;
     @Autowired
     private DeviceUtil deviceUtil;
     @Autowired
     private DeviceRepository deviceRepository;
     @Autowired
     private MeasureRepository measureRepository;
+    @Autowired
+    private ResourceLoader resourceLoader;
 
     @Override
-    public void afterPropertiesSet() {     //서버가 실행시 디바이스의 정보를 관리 시스템으로 송신
-        sendDevice();
-    }
-
-    @Override
-    public void run() {               //스크립트를 실행하고 측정 결과를 송신한다.
-        String fileName = file.getName();
-        String fileDirectory = file.getPath().substring(0, file.getPath().length() - fileName.length() - 1);
-        String command = "java -cp " + fileDirectory + " " + fileName.substring(0, fileName.length() - 6);          //실행하기 위한 커맨드 생성
-
-        logger.debug("-----> input command is : " + command);
-
-        Measure measure = new Measure();
-        measure.setDeviceId(deviceUtil.getDevice().getId());
+    public Device executeCommand(){
+        device = new Device();
+        Properties properties = new Properties();
 
         try {
-            long beforeTime = System.currentTimeMillis();
-            String result = null;
-            synchronized (this) {
-                result = deviceUtil.executeCommand(command);         //스크립트 실행...
+            File file = resourceLoader.getResource("classpath:config/device-id.properties").getFile();      //운영체제 별 명령어를 가지고 있는 properties 가져오기
+            properties.load(new InputStreamReader(new FileInputStream(file)));
+
+            String osName = System.getProperty("os.name").toLowerCase();                                       //운영체제 이름 가져오기
+            if (osName.contains("win")) {
+                osName = "win";
+
+            } else if (osName.contains("nix") || osName.contains("nux") || osName.contains("aix")) {
+                osName = "unix";
+
+            } else if (osName.contains("linux")) {
+                osName = "linux";
+
+            } else {
+                osName = "unix";
+
             }
 
-            logger.debug("-----> script result is : " + result);
-            long afterTime = System.currentTimeMillis();
+            String systemInfoCommand = properties.getProperty(osName + "-command");         //운영체제에 맞는 명령어 찾기
+            String productIdCommand = properties.getProperty(osName + "-id");
 
-            long secDiffTime = (afterTime - beforeTime);                //실행 시간 측정
-            measure.setExecTime(Long.toString(secDiffTime));
-            measure.setStatus('Y');             //성공하면 상태를 'Y'로 지정
+            String systemInfo = deviceUtil.executeCommand(systemInfoCommand);          //제품 ID를 찾기 위한 명령어 실행
+            String[] splitSystemInfo = systemInfo.split("\n");
+            for (String line : splitSystemInfo) {
+                String[] splitLine = line.split(":");
 
+                if (productIdCommand.equals(splitLine[0].trim())) {
+                    device.setId(splitLine[1].trim());                      //제품 ID 지정
+                }
+            }
+
+            String hostNameInfo = deviceUtil.executeCommand("hostname").trim();        //호스트 이름 지정
+            device.setHostName(hostNameInfo);
+
+            String jdkInfo = deviceUtil.executeCommand("java --version");              //JDK-version 지정
+            String[] springJdk = jdkInfo.split(" ");
+            device.setJdkVersion(springJdk[1]);
+
+            String ipAddress = "";
+            Enumeration<NetworkInterface> networkInterfaceEnumeration = NetworkInterface.getNetworkInterfaces();
+
+            while (networkInterfaceEnumeration.hasMoreElements()) {                  //IP 주소 지정
+                NetworkInterface networkInterface = networkInterfaceEnumeration.nextElement();
+                Enumeration<InetAddress> inetAddresses= networkInterface.getInetAddresses();
+
+                while (inetAddresses.hasMoreElements()) {
+                    InetAddress inetAddress = inetAddresses.nextElement();
+
+                    if (!inetAddress.isLoopbackAddress() &&
+                            !inetAddress.isLinkLocalAddress() &&
+                            inetAddress.isSiteLocalAddress()) {
+
+                        ipAddress = inetAddress.getHostAddress().toString();
+                    }
+                }
+            }
+
+            device.setIpAddress(ipAddress);
+
+            logger.debug("-----------> productIdCommand and information of device are : " + productIdCommand + device);
         } catch (Exception e) {
             e.printStackTrace();
-
-            measure.setExecTime("0");
-            measure.setStatus('N');             //실행 실패 시 상태를 'N', 실행시간을 0으로 지정한다.
-        } finally {
-            logger.debug("-----> measure information is : " + measure);
-
-            sendMeasure(measure);
-
-            file.delete();
-        }
-    }
-
-    @Override
-    public Device executeCommand() {
-        Device device = null;
-
-        if ((device = deviceUtil.getDevice()) == null) {
-            return deviceUtil.createDevice();
+            logger.debug("-----------> fail to create information of device");
         }
 
         return device;
     }
 
     @Override
-    public void sendDevice() {
-        Device device = executeCommand();
-
+    public void sendDevice(Device device) {
         for (int i = 0; i < 10; i++) {                //전송 실패 시 10번 까지 재전송 한다.
             try {
                 if (deviceRepository.request(device)) {
@@ -100,32 +122,14 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                logger.debug("------>  Fail to send device information...");
+                logger.debug("------>  Fail to send device information in catch block");
             }
         }
 
     }
 
     @Override
-    public File receiveScript(MultipartFile multipartFile, HttpServletRequest request, String id) throws Exception {
-        String deviceId = deviceUtil.getDevice().getId();
-
-        logger.debug("------>  decryption is " + decryption);
-        if ("true".equals(decryption)) {
-            try {
-                Cryptogram cryptogram = new Cryptogram(deviceId);
-                String decryptionId = cryptogram.decrypt(id);          //복호화
-
-                if (!deviceId.equals(decryptionId)) {
-                    throw new FileNotFoundException();              //복호화한 아이디가 일치하지 않을 경우 400에러 응답
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new FileNotFoundException();
-            }
-        }
-
+    public File receiveScript(MultipartFile multipartFile, HttpServletRequest request) throws Exception {
         String path = request.getSession().getServletContext().getRealPath("/") + "script";
 
         File directory = new File(path);            //디렉토리 설정
@@ -135,7 +139,7 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
         }
 
         try {
-            deviceUtil.executeCommand("chmod -R 777 " + request.getSession().getServletContext().getRealPath("/") + File.separator);
+            deviceUtil.executeCommand("chmod -R 777 " + request.getSession().getServletContext().getRealPath("/"));
         } catch (Exception e) {
 
         }
@@ -154,28 +158,81 @@ public class AgentServiceImpl implements AgentService, InitializingBean, Runnabl
     }
 
     @Override
-    public void executeScript(MultipartFile multipartFile, HttpServletRequest request, String id) throws Exception {
-        file = receiveScript(multipartFile, request, id);
+    public boolean decryption(String word) throws Exception {
+        String deviceId = device.getId();
 
-        Thread thread = new Thread(this);      //스크립트를 실행하고 측정 결과를 송신하는 스레드
+        logger.debug("------>  decryption is : " + decryption);
+        if ("true".equals(decryption)) {
+            try {
+                Cryptogram cryptogram = new Cryptogram(deviceId);
+                String decryptionId = cryptogram.decrypt(word);
 
-        thread.start();
+                if (deviceId.equals(decryptionId)) {
+                    return true;
+                } else {
+                    return false;
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new FileNotFoundException();
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public Measure executeScript(File file){
+        String fileName = file.getName();
+        String fileDirectory = file.getPath().substring(0, file.getPath().length() - fileName.length() - 1);
+        String command = "java -cp " + fileDirectory + " " + fileName.substring(0, fileName.length() - 6);          //실행하기 위한 커맨드 생성
+
+        logger.debug("-----> input command is : " + command);
+
+        Measure measure = new Measure();
+        measure.setDeviceId(device.getId());
+
+        try {
+            long beforeTime = System.currentTimeMillis();
+
+            String result = null;
+            synchronized (this) {
+                result = deviceUtil.executeCommand(command);         //스크립트 실행...
+
+            }
+
+            logger.debug("-----> script result is : " + result);
+            long afterTime = System.currentTimeMillis();
+
+            long secDiffTime = (afterTime - beforeTime);                //실행 시간 측정
+            measure.setExecTime(Long.toString(secDiffTime));
+            measure.setStatus('Y');             //성공하면 상태를 'Y'로 지정
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            measure.setExecTime("0");
+            measure.setStatus('N');             //실행 실패 시 상태를 'N', 실행시간을 0으로 지정한다.
+        }
+
+        return measure;
     }
 
     @Override
     public void sendMeasure(Measure measure) {
         try {
             if (measureRepository.request(measure)) {
-                logger.debug("------>  측정 결과 정보 송신 성공!!");
+                logger.debug("------>  success in sending measure result!!");
 
             } else {
-                logger.debug("------>  측정 결과 정보 송신 실패");
+                logger.debug("------>  fail to send measure result");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
 
-            logger.debug("------>  측정 결과 정보 송신 실패");
+            logger.debug("------>  fail to send measure result in catch block");
         }
     }
 }
