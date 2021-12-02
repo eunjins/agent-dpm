@@ -38,38 +38,12 @@ public class Cryptogram {
         this.secretKeySpec = secretKeySpec;
     }
 
-    public String encrypt(Object word) throws Exception {
-        if (word == null) {
-            return null;
-        }
-
-        return encrypt(String.valueOf(word));
-    }
-
     public String decrypt(Object word) throws Exception {
         if (word == null) {
             return null;
         }
 
         return decrypt(String.valueOf(word));
-    }
-
-    private String encrypt(String word) throws Exception {
-        if (StringUtils.isEmpty(word)) {
-            return "";
-        }
-
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, this.secretKeySpec, new IvParameterSpec(this.iv.getBytes()));
-
-        byte[] encrypted = cipher.doFinal(word.getBytes("UTF-8"));
-        String encrypWord = new String(Base64.encodeBase64(encrypted));
-
-        // logger.debug("############################################################");
-        // logger.debug(" Encrypt : " + word + " ---> " + encrypWord);
-        // logger.debug("############################################################");
-
-        return encrypWord;
     }
 
     private String decrypt(String word) throws Exception {
@@ -89,18 +63,5 @@ public class Cryptogram {
         // logger.debug("############################################################");
 
         return decryptWord;
-    }
-
-    public static void main(String[] args) throws Exception {
-        String loginidx = "MEM201605090243";
-        String key = "asd256-test-key!!";
-
-        Cryptogram cryptogram = new Cryptogram(key);
-
-        String encryptWord = cryptogram.encrypt(loginidx);
-        System.out.println(encryptWord);
-
-        String decryptWord = cryptogram.decrypt(encryptWord);
-        System.out.println(decryptWord);
     }
 }
