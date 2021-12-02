@@ -20,7 +20,7 @@ public class AgentController {
     @Autowired
     DeviceUtil deviceUtil;
 
-    @PostMapping("/script/distribute")
+    @PostMapping("/script")
     public Map<String, String> receiveScript(@RequestParam("scriptFile") MultipartFile multipartFile
             , HttpServletRequest request
             , @RequestParam String encryptId) {
