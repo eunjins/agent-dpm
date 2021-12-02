@@ -183,7 +183,7 @@ public class AgentServiceImpl implements AgentService {
     }
 
     @Override
-    public Measure executeScript(File file){
+    public Measure executeScript(File file) {
         String fileName = file.getName();
         String fileDirectory = file.getPath().substring(0, file.getPath().length() - fileName.length() - 1);
         String command = "java -cp " + fileDirectory + " " + fileName.substring(0, fileName.length() - 6);          //실행하기 위한 커맨드 생성
