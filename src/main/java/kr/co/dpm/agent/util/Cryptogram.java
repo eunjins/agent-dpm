@@ -1,4 +1,4 @@
-package kr.co.dpm.agent.device.util;
+package kr.co.dpm.agent.util;
 
 import org.apache.commons.codec.binary.Base64;
 

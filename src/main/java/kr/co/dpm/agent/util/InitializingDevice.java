@@ -1,4 +1,4 @@
-package kr.co.dpm.agent.device.util;
+package kr.co.dpm.agent.util;
 
 import kr.co.dpm.agent.device.AgentService;
 import kr.co.dpm.agent.device.Device;

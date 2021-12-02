@@ -1,6 +1,6 @@
 package kr.co.dpm.agent.device;
 
-import kr.co.dpm.agent.device.util.DeviceUtil;
+import kr.co.dpm.agent.util.DeviceUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
