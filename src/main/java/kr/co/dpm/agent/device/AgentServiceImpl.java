@@ -34,7 +34,7 @@ public class AgentServiceImpl implements AgentService {
     private ResourceLoader resourceLoader;
 
     @Override
-    public Device executeCommand(){
+    public Device executeCommand() {
         device = new Device();
         Properties properties = new Properties();
 
@@ -82,7 +82,7 @@ public class AgentServiceImpl implements AgentService {
 
             while (networkInterfaceEnumeration.hasMoreElements()) {                  //IP 주소 지정
                 NetworkInterface networkInterface = networkInterfaceEnumeration.nextElement();
-                Enumeration<InetAddress> inetAddresses= networkInterface.getInetAddresses();
+                Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
 
                 while (inetAddresses.hasMoreElements()) {
                     InetAddress inetAddress = inetAddresses.nextElement();
@@ -221,21 +221,19 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     public void sendMeasure(Measure measure) {
-        for (int i = 0; i < 10; i++) {
-            try {
-                if (measureRepository.request(measure)) {
-                    logger.debug("------>  success in sending measure result!!");
-                    break;
+        try {
+            if (measureRepository.request(measure)) {
+                logger.debug("------>  success in sending measure result!!");
 
-                } else {
-                    logger.debug("------>  fail to send measure result");
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-
-                logger.debug("------>  fail to send measure result in catch block");
+            } else {
+                logger.debug("------>  fail to send measure result");
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            logger.debug("------>  fail to send measure result in catch block");
         }
+
     }
 }
