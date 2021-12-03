@@ -1,8 +1,8 @@
 package kr.co.dpm.agent.device;
 
 
-import kr.co.dpm.agent.device.util.Cryptogram;
-import kr.co.dpm.agent.device.util.DeviceUtil;
+import kr.co.dpm.agent.util.Cryptogram;
+import kr.co.dpm.agent.util.DeviceUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
