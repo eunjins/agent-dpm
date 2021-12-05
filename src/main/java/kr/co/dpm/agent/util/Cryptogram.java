@@ -58,10 +58,6 @@ public class Cryptogram {
 
         String decryptWord = new String(cipher.doFinal(decrypted), "UTF-8");
 
-        // logger.debug("############################################################");
-        // logger.debug(" Decrypt : " + word + " ---> " + decryptWord);
-        // logger.debug("############################################################");
-
         return decryptWord;
     }
 }

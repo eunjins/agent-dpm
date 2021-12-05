@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.apache.logging.log4j.LogManager;
@@ -32,7 +33,7 @@ public class DeviceUtil implements Runnable {
         agentService.sendMeasure(measure);
     }
 
-    public String executeCommand(String command) throws Exception {     //명령어 실행
+    public String executeCommand(String command) throws Exception {
         logger.debug("--------> command is : " + command);
 
         Process process = Runtime.getRuntime().exec(command);
@@ -54,16 +55,14 @@ public class DeviceUtil implements Runnable {
 
             return resultBuffer.toString();
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
-
             throw e;
         } finally {
             try {
                 if (bufferedReader != null) {
                     bufferedReader.close();
                 }
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
