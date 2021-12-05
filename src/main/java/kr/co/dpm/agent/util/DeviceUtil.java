@@ -28,9 +28,12 @@ public class DeviceUtil implements Runnable {
             measure = agentService.executeScript(file);
         } catch (Exception e) {
             e.printStackTrace();
-        }
 
-        agentService.sendMeasure(measure);
+            measure.setStatus('N');
+            measure.setExecTime("0");
+        } finally {
+            agentService.sendMeasure(measure);
+        }
     }
 
     public String executeCommand(String command) throws Exception {

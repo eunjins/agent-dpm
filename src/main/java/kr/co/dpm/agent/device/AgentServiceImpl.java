@@ -183,38 +183,30 @@ public class AgentServiceImpl implements AgentService {
     }
 
     @Override
-    public Measure executeScript(File file) {
+    public Measure executeScript(File file) throws Exception {
+        Measure measure = new Measure();
+        measure.setDeviceId(device.getId());
+
         String fileName = file.getName();
         String fileDirectory = file.getPath().substring(0, file.getPath().length() - fileName.length() - 1);
         String command = "java -cp " + fileDirectory + " " + fileName.substring(0, fileName.length() - 6);          //실행하기 위한 커맨드 생성
 
         logger.debug("-----> input command is : " + command);
 
-        Measure measure = new Measure();
-        measure.setDeviceId(device.getId());
+        long beforeTime = System.currentTimeMillis();
 
-        try {
-            long beforeTime = System.currentTimeMillis();
+        String result = null;
+        synchronized (this) {
+            result = deviceUtil.executeCommand(command);         //스크립트 실행...
 
-            String result = null;
-            synchronized (this) {
-                result = deviceUtil.executeCommand(command);         //스크립트 실행...
-
-            }
-
-            logger.debug("-----> script result is : " + result);
-            long afterTime = System.currentTimeMillis();
-
-            long secDiffTime = (afterTime - beforeTime);                //실행 시간 측정
-            measure.setExecTime(Long.toString(secDiffTime));
-            measure.setStatus('Y');             //성공하면 상태를 'Y'로 지정
-
-        } catch (Exception e) {
-            e.printStackTrace();
-
-            measure.setExecTime("0");
-            measure.setStatus('N');             //실행 실패 시 상태를 'N', 실행시간을 0으로 지정한다.
         }
+
+        logger.debug("-----> script result is : " + result);
+        long afterTime = System.currentTimeMillis();
+
+        long secDiffTime = (afterTime - beforeTime);                //실행 시간 측정
+        measure.setExecTime(Long.toString(secDiffTime));
+        measure.setStatus('Y');             //성공하면 상태를 'Y'로 지정
 
         return measure;
     }
@@ -227,12 +219,22 @@ public class AgentServiceImpl implements AgentService {
 
             } else {
                 logger.debug("------>  fail to send measure result");
+
+                measure.setStatus('N');
+                measure.setExecTime("0");
+
+                sendMeasure(measure);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
 
             logger.debug("------>  fail to send measure result in catch block");
+
+            measure.setStatus('N');
+            measure.setExecTime("0");
+
+            sendMeasure(measure);
         }
 
     }

@@ -14,7 +14,7 @@ public interface AgentService {
 
     public boolean decryption(String word) throws Exception;
 
-    public Measure executeScript(File file);
+    public Measure executeScript(File file) throws Exception;
 
     public void sendMeasure(Measure measure);
 }
