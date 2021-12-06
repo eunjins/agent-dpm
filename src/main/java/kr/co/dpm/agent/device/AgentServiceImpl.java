@@ -73,9 +73,8 @@ public class AgentServiceImpl implements AgentService {
             String hostNameInfo = deviceUtil.executeCommand("hostname").trim();        //호스트 이름 지정
             device.setHostName(hostNameInfo);
 
-            String jdkInfo = deviceUtil.executeCommand("java --version");              //JDK-version 지정
-            String[] springJdk = jdkInfo.split(" ");
-            device.setJdkVersion(springJdk[1]);
+            String jdkInfo = System.getProperty("java.version");           //JDK-version 지정
+            device.setJdkVersion(jdkInfo);
 
             String ipAddress = "";
             Enumeration<NetworkInterface> networkInterfaceEnumeration = NetworkInterface.getNetworkInterfaces();
