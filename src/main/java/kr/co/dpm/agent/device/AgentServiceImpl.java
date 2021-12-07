@@ -164,7 +164,7 @@ public class AgentServiceImpl implements AgentService {
         if ("true".equals(decryption)) {
             try {
                 Cryptogram cryptogram = new Cryptogram(deviceId);
-                String decryptionId = cryptogram.decrypt(word);
+                String decryptionId = cryptogram.decryption(word);
 
                 if (deviceId.equals(decryptionId)) {
                     return true;

@@ -38,15 +38,15 @@ public class Cryptogram {
         this.secretKeySpec = secretKeySpec;
     }
 
-    public String decrypt(Object word) throws Exception {
+    public String decryption(Object word) throws Exception {
         if (word == null) {
             return null;
         }
 
-        return decrypt(String.valueOf(word));
+        return decryption(String.valueOf(word));
     }
 
-    private String decrypt(String word) throws Exception {
+    private String decryption(String word) throws Exception {
         if (StringUtils.isEmpty(word)) {
             return "";
         }
