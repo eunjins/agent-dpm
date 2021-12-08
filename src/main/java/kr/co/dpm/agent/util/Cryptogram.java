@@ -24,7 +24,6 @@ public class Cryptogram {
         try {
             utf8KeyBytes = key.getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
         }
 
         int len = utf8KeyBytes.length;

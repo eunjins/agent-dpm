@@ -9,7 +9,6 @@ public class Device implements Serializable {
     private String jdkVersion;
 
     public Device() {
-
     }
 
     public String getId() {

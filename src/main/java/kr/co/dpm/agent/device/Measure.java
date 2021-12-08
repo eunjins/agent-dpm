@@ -8,7 +8,6 @@ public class Measure implements Serializable {
     private char status;
 
     public Measure() {
-
     }
 
     public String getDeviceId() {

@@ -24,16 +24,15 @@ public class DeviceRepositoryImpl implements DeviceRepository {
         String json = objectMapper.writeValueAsString(device);
         RequestBody body = RequestBody.create(JSON, json);
 
-        logger.debug("-------------> request json is : " + json);
         Request request = new Request.Builder()
-                .url("http://" + ipAddress + "/devices/data")
-                .post(body)
-                .build();
+                                     .url("http://" + ipAddress + "/devices/data")
+                                     .post(body)
+                                     .build();
 
         Response response = client.newCall(request).execute();
         ResponseBody responseBody = response.body();
-        JSONObject idResponse = new JSONObject(responseBody.string());
 
+        JSONObject idResponse = new JSONObject(responseBody.string());
         if ("200".equals(idResponse.getString("code"))) {
             return true;
         } else {

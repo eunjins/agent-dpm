@@ -1,6 +1,8 @@
 package kr.co.dpm.agent.device;
 
 import kr.co.dpm.agent.util.DeviceUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,6 +17,8 @@ import java.util.Map;
 
 @RestController
 public class AgentController {
+    private static final Logger logger = LogManager.getLogger(AgentService.class);
+
     @Autowired
     AgentService agentService;
 
@@ -25,33 +29,35 @@ public class AgentController {
     public Map<String, String> receiveScript(@RequestParam("scriptFile") MultipartFile multipartFile
             , HttpServletRequest request
             , @RequestParam String encryptId) {
-        Map<String, String> status = new HashMap<String, String>();
+        logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        logger.info("                        【RECEIVE SCRIPT】                               ");
+        logger.info("                                                                       ");
+        logger.info("      Script File :   " + multipartFile.getOriginalFilename()           );
+        logger.info("      Encrypt Id  :   " + encryptId                                     );
+        logger.info("                                                                       ");
+        logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
+        Map<String, String> status = new HashMap<>();
         try {
             if (agentService.decryption(encryptId)) {
-                File file = agentService.receiveScript(multipartFile, request);
-
                 status.put("code", "200");
                 status.put("message", "정상 요청");
 
+                File file = agentService.receiveScript(multipartFile, request);
                 deviceUtil.setFile(file);
                 Thread thread = new Thread(deviceUtil);
                 thread.start();
-
             } else {
                 status.put("code", "400");
                 status.put("message", "잘못된 요청");
             }
-
         } catch (FileNotFoundException e) {
             status.put("code", "400");
             status.put("message", "잘못된 요청");
-            e.printStackTrace();
-
         } catch (Exception e) {
+            e.printStackTrace();
             status.put("code", "500");
             status.put("message", "내부 서버 오류");
-            e.printStackTrace();
         }
 
         return status;

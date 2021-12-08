@@ -27,8 +27,6 @@ public class DeviceUtil implements Runnable {
         try {
             measure = agentService.executeScript(file);
         } catch (Exception e) {
-            e.printStackTrace();
-
             measure.setStatus('N');
             measure.setExecTime("0");
         } finally {
@@ -37,29 +35,24 @@ public class DeviceUtil implements Runnable {
     }
 
     public String executeCommand(String command) throws Exception {
-        logger.debug("--------> command is : " + command);
-
         Process process = Runtime.getRuntime().exec(command);
+        logger.info("                          RUNNING...                          ");
+        logger.info("                                                                  ");
 
         BufferedReader bufferedReader = null;
-
         try {
             bufferedReader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()
-                            , "euc-kr"));
+                             new InputStreamReader(process.getInputStream(), "euc-kr"));
 
             StringBuffer resultBuffer = new StringBuffer();
             String line = null;
-
             while ((line = bufferedReader.readLine()) != null) {
                 resultBuffer.append("\n");
                 resultBuffer.append(line);
             }
 
             return resultBuffer.toString();
-
         } catch (IOException e) {
-            e.printStackTrace();
             throw e;
         } finally {
             try {
@@ -67,7 +60,6 @@ public class DeviceUtil implements Runnable {
                     bufferedReader.close();
                 }
             } catch (Exception e) {
-                e.printStackTrace();
             }
         }
     }
