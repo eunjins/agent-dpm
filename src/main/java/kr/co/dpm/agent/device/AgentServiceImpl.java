@@ -160,7 +160,8 @@ public class AgentServiceImpl implements AgentService {
         String deviceId = device.getId();
         if ("true".equals(decryption)) {
             logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            logger.info("                        SUCCESSFUL DECRYPTION !                        ");
+            logger.info("                                                                       ");
+            logger.info("                           SUCCESSFUL DECRYPTION !                        ");
             logger.info("                                                                       ");
             try {
                 Cryptogram cryptogram = new Cryptogram(deviceId);
