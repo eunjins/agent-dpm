@@ -40,6 +40,8 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     public Device executeCommand() throws Exception {
+        logger.info("                                   RUNNING...                          ");
+        logger.info("                                                                      ");
         device = new Device();
         Properties properties = new Properties();
 
@@ -146,7 +148,7 @@ public class AgentServiceImpl implements AgentService {
         if ("true".equals(decryption)) {
             logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             logger.info("                                                                       ");
-            logger.info("                           SUCCESSFUL DECRYPTION !                        ");
+            logger.info("                        SUCCESSFUL DECRYPTION !                           ");
             logger.info("                                                                       ");
             try {
                 Cryptogram cryptogram = new Cryptogram(deviceId);
@@ -174,8 +176,10 @@ public class AgentServiceImpl implements AgentService {
 
         long beforeTime = System.currentTimeMillis();
         synchronized (this) {
+            logger.info("                              RUNNING...                               ");
+            logger.info("                                                                      ");
             result = deviceUtil.executeCommand(command);
-            logger.info("                        SUCCESSFUL SCRIPT EXECUTION !                  ");
+            logger.info("                     SUCCESSFUL SCRIPT EXECUTION !                     ");
             logger.info("                                                                       ");
             logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 

@@ -46,8 +46,6 @@ public class DeviceUtil implements Runnable {
 
     public String executeCommand(String command) throws Exception {
         Process process = Runtime.getRuntime().exec(command);
-        logger.info("                                   RUNNING...                          ");
-        logger.info("                                                                      ");
 
         BufferedReader bufferedReader = null;
         try {
