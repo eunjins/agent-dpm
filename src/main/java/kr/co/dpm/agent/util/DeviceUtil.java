@@ -30,7 +30,17 @@ public class DeviceUtil implements Runnable {
             measure.setStatus('N');
             measure.setExecTime("0");
         } finally {
-            agentService.sendMeasure(measure);
+            while(true) {
+                try {
+                    agentService.sendMeasure(measure);
+                    break;
+                } catch (Exception e) {
+                    logger.error("fail to send measure result in catch block : " + e.getMessage());
+
+                    measure.setStatus('N');
+                    measure.setExecTime("0");
+                }
+            }
         }
     }
 
@@ -60,6 +70,7 @@ public class DeviceUtil implements Runnable {
                     bufferedReader.close();
                 }
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

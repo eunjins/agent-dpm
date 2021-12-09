@@ -39,103 +39,90 @@ public class AgentServiceImpl implements AgentService {
     private ResourceLoader resourceLoader;
 
     @Override
-    public Device executeCommand() {
+    public Device executeCommand() throws Exception {
         device = new Device();
         Properties properties = new Properties();
 
-        try {
-            File file = resourceLoader.getResource("classpath:config/device-id.properties").getFile();
-            properties.load(new InputStreamReader(new FileInputStream(file)));
+        File file = resourceLoader.getResource("classpath:config/device-id.properties").getFile();
+        properties.load(new InputStreamReader(new FileInputStream(file)));
 
-            String osName = System.getProperty("os.name").toLowerCase();
-            if (osName.contains("win")) {
-                osName = "win";
-            } else if (osName.contains("nix")
-                    || osName.contains("nux")
-                    || osName.contains("aix")) {
-                osName = "unix";
-            } else if (osName.contains("linux")) {
-                osName = "linux";
-            } else {
-                osName = "unix";
-            }
-
-            String systemInfoCommand = properties.getProperty(osName + "-command");
-            String productIdCommand = properties.getProperty(osName + "-id");
-
-            String systemInfo = deviceUtil.executeCommand(systemInfoCommand);
-            String[] splitSystemInfo = systemInfo.split("\n");
-            for (String line : splitSystemInfo) {
-                String[] splitLine = line.split(":");
-                if (productIdCommand.equals(splitLine[0].trim())) {
-                    device.setId(splitLine[1].trim());
-                }
-            }
-
-            String hostNameInfo = deviceUtil.executeCommand("hostname").trim();
-            device.setHostName(hostNameInfo);
-
-            String jdkInfo = System.getProperty("java.version");
-            device.setJdkVersion(jdkInfo);
-
-            String ipAddress = "";
-            Enumeration<NetworkInterface> networkInterfaceEnumeration = NetworkInterface.getNetworkInterfaces();
-
-            while (networkInterfaceEnumeration.hasMoreElements()) {
-                NetworkInterface networkInterface = networkInterfaceEnumeration.nextElement();
-                Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
-                while (inetAddresses.hasMoreElements()) {
-                    InetAddress inetAddress = inetAddresses.nextElement();
-                    if (!inetAddress.isLoopbackAddress()
-                            && !inetAddress.isLinkLocalAddress()
-                            && inetAddress.isSiteLocalAddress()) {
-                        ipAddress = inetAddress.getHostAddress().toString();
-                    }
-                }
-            }
-
-            device.setIpAddress(ipAddress);
-        } catch (Exception e) {
-            logger.info("fail to create information of device");
+        String osName = System.getProperty("os.name").toLowerCase();
+        if (osName.contains("win")) {
+            osName = "win";
+        } else if (osName.contains("nix")
+                || osName.contains("nux")
+                || osName.contains("aix")) {
+            osName = "unix";
+        } else if (osName.contains("linux")) {
+            osName = "linux";
+        } else {
+            osName = "unix";
         }
+
+        String systemInfoCommand = properties.getProperty(osName + "-command");
+        String productIdCommand = properties.getProperty(osName + "-id");
+
+        String systemInfo = deviceUtil.executeCommand(systemInfoCommand);
+        String[] splitSystemInfo = systemInfo.split("\n");
+        for (String line : splitSystemInfo) {
+            String[] splitLine = line.split(":");
+            if (productIdCommand.equals(splitLine[0].trim())) {
+                device.setId(splitLine[1].trim());
+            }
+        }
+
+        String hostNameInfo = deviceUtil.executeCommand("hostname").trim();
+        device.setHostName(hostNameInfo);
+
+        String jdkInfo = System.getProperty("java.version");
+        device.setJdkVersion(jdkInfo);
+
+        String ipAddress = "";
+        Enumeration<NetworkInterface> networkInterfaceEnumeration = NetworkInterface.getNetworkInterfaces();
+
+        while (networkInterfaceEnumeration.hasMoreElements()) {
+            NetworkInterface networkInterface = networkInterfaceEnumeration.nextElement();
+            Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
+            while (inetAddresses.hasMoreElements()) {
+                InetAddress inetAddress = inetAddresses.nextElement();
+                if (!inetAddress.isLoopbackAddress()
+                        && !inetAddress.isLinkLocalAddress()
+                        && inetAddress.isSiteLocalAddress()) {
+                    ipAddress = inetAddress.getHostAddress().toString();
+                }
+            }
+        }
+
+        device.setIpAddress(ipAddress);
 
         return device;
     }
 
     @Override
-    public void sendDevice(Device device) {
-        for (int i = 0; i < 10; i++) {
-            try {
-                if (deviceRepository.request(device)) {
-                    logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                    logger.info("                        【SEND DEVICE INFORMATION】                      ");
-                    logger.info("                                                                       ");
-                    logger.info("      Device ID   :   " + device.getId()                                );
-                    logger.info("      Host Name   :   " + device.getHostName()                          );
-                    logger.info("      IP Address  :   " + device.getIpAddress()                         );
-                    logger.info("      JDK Version :   " + device.getJdkVersion()                        );
-                    logger.info("                                                                       ");
-                    logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    public void sendDevice(Device device) throws Exception {
+        if (deviceRepository.request(device)) {
 
-                    break;
-                } else {
-                    logger.info("Fail to send device information");
+            logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            logger.info("                        【SEND DEVICE INFORMATION】                      ");
+            logger.info("                                                                       ");
+            logger.info("      Device ID   :   " + device.getId());
+            logger.info("      Host Name   :   " + device.getHostName());
+            logger.info("      IP Address  :   " + device.getIpAddress());
+            logger.info("      JDK Version :   " + device.getJdkVersion());
+            logger.info("                                                                       ");
+            logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-                    Thread.sleep(1000);
-                }
-            } catch (Exception e) {
-                logger.info("Fail to send device information in catch block");
-            }
+        } else {
+            throw new Exception();
         }
-
     }
 
     @Override
     public File receiveScript(MultipartFile multipartFile
-                            , HttpServletRequest request) throws Exception {
+            , HttpServletRequest request) throws Exception {
         String path = request.getSession()
-                             .getServletContext()
-                             .getRealPath("/") + "script";
+                .getServletContext()
+                .getRealPath("/") + "script";
 
         File directory = new File(path);
         if (!directory.isDirectory()) {
@@ -147,8 +134,6 @@ public class AgentServiceImpl implements AgentService {
         file.setExecutable(true, false);
         file.setReadable(true, false);
         file.setWritable(true, false);
-
-//        logger.info("permission of file : " + file.canWrite() + file.canExecute());
 
         multipartFile.transferTo(file);
 
@@ -207,29 +192,18 @@ public class AgentServiceImpl implements AgentService {
     }
 
     @Override
-    public void sendMeasure(Measure measure) {
-        try {
-            if (measureRepository.request(measure)) {
-                logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                logger.info("                        【SEND MEASURE RESULT】                          ");
-                logger.info("                                                                       ");
-                logger.info("      Device ID   :   " + measure.getDeviceId() + "                    ");
-                logger.info("      Execute Time:   " + measure.getExecTime() + "                    ");
-                logger.info("      Status      :   " + measure.getStatus() + "                      ");
-                logger.info("                                                                       ");
-                logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            } else {
-                logger.info("fail to send measure result");
-
-                measure.setStatus('N');
-                measure.setExecTime("0");
-
-                sendMeasure(measure);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-
-            logger.info("fail to send measure result in catch block");
+    public void sendMeasure(Measure measure) throws Exception {
+        if (measureRepository.request(measure)) {
+            logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            logger.info("                        【SEND MEASURE RESULT】                          ");
+            logger.info("                                                                       ");
+            logger.info("      Device ID   :   " + measure.getDeviceId() + "                    ");
+            logger.info("      Execute Time:   " + measure.getExecTime() + "                    ");
+            logger.info("      Status      :   " + measure.getStatus() + "                      ");
+            logger.info("                                                                       ");
+            logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        } else {
+            logger.info("fail to send measure result");
 
             measure.setStatus('N');
             measure.setExecTime("0");
