@@ -33,7 +33,6 @@ public class MeasureRepositoryImpl implements MeasureRepository{
         ResponseBody responseBody = response.body();
 
         String responseMessage = responseBody.string();
-        logger.debug(responseMessage);
 
         JSONObject idResponse = new JSONObject(responseMessage);
         if ("200".equals(idResponse.getString("code"))) {
