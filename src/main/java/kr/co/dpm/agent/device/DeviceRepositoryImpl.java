@@ -1,8 +1,6 @@
 package kr.co.dpm.agent.device;
 
 import okhttp3.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,8 +8,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class DeviceRepositoryImpl implements DeviceRepository {
-    private static final Logger logger = LogManager.getLogger(DeviceRepositoryImpl.class);
-
     @Value("${server-ip}")
     private String ipAddress;
 
@@ -33,10 +29,7 @@ public class DeviceRepositoryImpl implements DeviceRepository {
         ResponseBody responseBody = response.body();
 
         JSONObject idResponse = new JSONObject(responseBody.string());
-        if ("200".equals(idResponse.getString("code"))) {
-            return true;
-        } else {
-            return false;
-        }
+
+        return "200".equals(idResponse.getString("code"));
     }
 }

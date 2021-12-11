@@ -24,7 +24,7 @@ public class MeasureRepositoryImpl implements MeasureRepository{
         String json = objectMapper.writeValueAsString(measure);
         RequestBody body = RequestBody.create(JSON, json);
 
-        Request request = new Request.Builder() //
+        Request request = new Request.Builder()
                                      .url("http://" + ipAddress + "/scripts/result")
                                      .post(body)
                                      .build();

@@ -41,7 +41,7 @@ public class AgentController {
         try {
             if (agentService.decryption(encryptId)) {
                 status.put("code", "200");
-                status.put("message", "정상 요청");
+                status.put("message", "");
 
                 File file = agentService.receiveScript(multipartFile, request);
                 deviceUtil.setFile(file);
