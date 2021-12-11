@@ -40,7 +40,7 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     public Device executeCommand() throws Exception {
-        logger.info("                                   RUNNING...                          ");
+        logger.info("                              RUNNING...                              ");
         logger.info("                                                                      ");
         device = new Device();
         Properties properties = new Properties();
@@ -90,7 +90,7 @@ public class AgentServiceImpl implements AgentService {
                 if (!inetAddress.isLoopbackAddress()
                         && !inetAddress.isLinkLocalAddress()
                         && inetAddress.isSiteLocalAddress()) {
-                    ipAddress = inetAddress.getHostAddress().toString();
+                    ipAddress = inetAddress.getHostAddress();
                 }
             }
         }
@@ -105,12 +105,12 @@ public class AgentServiceImpl implements AgentService {
         if (deviceRepository.request(device)) {
 
             logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            logger.info("                        【SEND DEVICE INFORMATION】                      ");
+            logger.info("                        【SEND DEVICE INFORMATION】                     ");
             logger.info("                                                                       ");
-            logger.info("      Device ID   :   " + device.getId());
-            logger.info("      Host Name   :   " + device.getHostName());
-            logger.info("      IP Address  :   " + device.getIpAddress());
-            logger.info("      JDK Version :   " + device.getJdkVersion());
+            logger.info("      Device ID   :   " + device.getId()                                );
+            logger.info("      Host Name   :   " + device.getHostName()                          );
+            logger.info("      IP Address  :   " + device.getIpAddress()                         );
+            logger.info("      JDK Version :   " + device.getJdkVersion()                        );
             logger.info("                                                                       ");
             logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
@@ -148,7 +148,7 @@ public class AgentServiceImpl implements AgentService {
         if ("true".equals(decryption)) {
             logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             logger.info("                                                                       ");
-            logger.info("                        SUCCESSFUL DECRYPTION !                           ");
+            logger.info("                        SUCCESSFUL DECRYPTION !                        ");
             logger.info("                                                                       ");
             try {
                 Cryptogram cryptogram = new Cryptogram(deviceId);
@@ -169,22 +169,21 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     public Measure executeScript(File file) throws Exception {
-        String result = null;
         String fileName = file.getName();
         String fileDirectory = file.getPath().substring(0, file.getPath().length() - fileName.length() - 1);
-        String command = "java -cp " + fileDirectory + " " + fileName.substring(0, fileName.length() - 6);          //실행하기 위한 커맨드 생성
+        String command = "java -cp " + fileDirectory + " " + fileName.substring(0, fileName.length() - 6);
 
+        logger.info("                              RUNNING...                               ");
+        logger.info("                                                                       ");
         long beforeTime = System.currentTimeMillis();
         synchronized (this) {
-            logger.info("                              RUNNING...                               ");
-            logger.info("                                                                      ");
-            result = deviceUtil.executeCommand(command);
-            logger.info("                     SUCCESSFUL SCRIPT EXECUTION !                     ");
-            logger.info("                                                                       ");
-            logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-
+            deviceUtil.executeCommand(command);
         }
         long afterTime = System.currentTimeMillis();
+        logger.info("                     SUCCESSFUL SCRIPT EXECUTION !                     ");
+        logger.info("                                                                       ");
+        logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
         long secDiffTime = (afterTime - beforeTime);
 
         Measure measure = new Measure();
@@ -199,11 +198,11 @@ public class AgentServiceImpl implements AgentService {
     public void sendMeasure(Measure measure) throws Exception {
         if (measureRepository.request(measure)) {
             logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            logger.info("                        【SEND MEASURE RESULT】                          ");
+            logger.info("                        【SEND MEASURE RESULT】                         ");
             logger.info("                                                                       ");
-            logger.info("      Device ID   :   " + measure.getDeviceId() + "                    ");
-            logger.info("      Execute Time:   " + measure.getExecTime() + "                    ");
-            logger.info("      Status      :   " + measure.getStatus() + "                      ");
+            logger.info("      Device ID   :   " + measure.getDeviceId()                         );
+            logger.info("      Execute Time:   " + measure.getExecTime()                         );
+            logger.info("      Status      :   " + measure.getStatus()                           );
             logger.info("                                                                       ");
             logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         } else {
