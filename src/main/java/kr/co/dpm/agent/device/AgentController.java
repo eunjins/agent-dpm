@@ -30,7 +30,7 @@ public class AgentController {
             , HttpServletRequest request
             , @RequestParam String encryptId) {
         logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        logger.info("                        【RECEIVE SCRIPT】                               ");
+        logger.info("                        【RECEIVE SCRIPT 】                               ");
         logger.info("                                                                       ");
         logger.info("      Script File :   " + multipartFile.getOriginalFilename()           );
         logger.info("      Encrypt Id  :   " + encryptId                                     );
