@@ -105,7 +105,7 @@ public class AgentServiceImpl implements AgentService {
         if (deviceRepository.request(device)) {
 
             logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            logger.info("                        【SEND DEVICE INFORMATION 】                     ");
+            logger.info("                        [SEND DEVICE INFORMATION]                     ");
             logger.info("                                                                       ");
             logger.info("      Device ID   :   " + device.getId()                                );
             logger.info("      Host Name   :   " + device.getHostName()                          );
@@ -198,7 +198,7 @@ public class AgentServiceImpl implements AgentService {
     public void sendMeasure(Measure measure) throws Exception {
         if (measureRepository.request(measure)) {
             logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            logger.info("                        【SEND MEASURE RESULT 】                         ");
+            logger.info("                        [SEND MEASURE RESULT]                         ");
             logger.info("                                                                       ");
             logger.info("      Device ID   :   " + measure.getDeviceId()                         );
             logger.info("      Execute Time:   " + measure.getExecTime()                         );
