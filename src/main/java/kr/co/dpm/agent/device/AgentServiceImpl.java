@@ -198,10 +198,10 @@ public class AgentServiceImpl implements AgentService {
     public void sendMeasure(Measure measure) throws Exception {
         if (measureRepository.request(measure)) {
             logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            logger.info("                        [SEND MEASURE RESULT]                         ");
+            logger.info("                        [SEND MEASURE RESULT]                          ");
             logger.info("                                                                       ");
             logger.info("      Device ID   :   " + measure.getDeviceId()                         );
-            logger.info("      Execute Time:   " + measure.getExecTime()                         );
+            logger.info("      Execute Time:   " + (measure.getExecTime()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " ms"                  );
             logger.info("      Status      :   " + measure.getStatus()                           );
             logger.info("                                                                       ");
             logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
